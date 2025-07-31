@@ -1,5 +1,5 @@
 import net from 'net';
-import fs from 'fs';
+import { router } from './router.js';
 
 const PORT = 83;
 
@@ -26,24 +26,14 @@ function handleConnection(socket) {
         // understand tls https
         // understand http status codes
         // response body
+        // read more about web servers in java and javascript
+        // mime types
 
         console.log('Received data: ', data.toString());
-        socket.write('HTTP/1.1 200 OK\r\n');
-        socket.write('Content-Type: text/html\r\n');
-        const responseBody = readFile('index.html');
-        socket.write(`Content-Length: ${Buffer.byteLength(responseBody, 'utf8')}\r\n`);
-        socket.write('\r\n');
-        socket.write(responseBody);
+        const [requestLine] = data.toString().split('\r\n');
+        const [method, urlPath, httpProtocol] = requestLine.split(' ');
+        socket.write(router(urlPath));
         socket.end();
-    }
-}
-
-function readFile(filePath) {
-    try {
-        return fs.readFileSync(filePath, 'utf8');
-    } catch (err) {
-        console.error('Error reading file:', err);
-        return 'File not found';
     }
 }
 
